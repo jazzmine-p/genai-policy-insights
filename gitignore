@@ -1,2 +1,8 @@
+# .env
+.env
+
 # Virtual Environment
 gaipal/
+
+# Test Data
+data/
