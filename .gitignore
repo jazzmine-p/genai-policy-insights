@@ -1,0 +1,11 @@
+# .env
+.env
+
+# data
+data/
+
+# virtual environment
+gaipal/
+
+# markdown
+*.md
