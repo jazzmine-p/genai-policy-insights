@@ -1,0 +1,21 @@
+umap_model:
+    n_neighbors: 10
+    n_components: 5
+    min_dist: 0.0
+    metric: cosine
+
+hdbscan_model:
+    min_cluster_size: 15
+    metric: euclidean
+    cluster_selection_method: eom
+    prediction_data: True
+
+vectorizer_model:
+    tokenizer: LemmaTokenizer()
+    preprocessor: preprocess_text
+    stop_words: english
+    ngram_range: (1, 3)
+    min_df: 10
+
+mmr_model:
+    diversity: 0.3
