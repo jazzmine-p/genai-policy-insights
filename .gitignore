@@ -9,3 +9,9 @@ gaipal/
 
 # markdown
 *.md
+
+# logs
+*.log
+
+# cache
+__pycache__/
