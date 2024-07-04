@@ -2,24 +2,23 @@ import nltk
 from nltk import word_tokenize          
 from nltk.stem import WordNetLemmatizer 
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Delete unwanted sections
 def filter_sections(all_sections):
-
+    logger.info("Filtering sections")
+    
     unwanted_sections_header = ["references", "appendix", "glossary", 'table of contents', 'acknowledgments', 'disclosure statement', 'author', 'contact', 'executive summary', 'introduction']
     unwanted_sections = [section for section in all_sections if any(text in re.search(r'#{1,6} (.*)', section).group(1)  for text in unwanted_sections_header)]
     filtered_sections = [section for section in all_sections if section not in unwanted_sections]
     return filtered_sections
-
-# Lemmatization
-class LemmaTokenizer:
-    def __init__(self):
-        self.wnl = WordNetLemmatizer()
-    def __call__(self, doc):
-        return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
     
-# Remove numbers and "et al"
+# Text preprocessing
 def preprocess_text(all_sections):
+    logger.info("Preprocessing text")
+
     for section in all_sections:
         for text in section:
             text = re.sub(r'\d+', '', text)

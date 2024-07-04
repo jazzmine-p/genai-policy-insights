@@ -1,7 +1,10 @@
 import os
 import fitz
-#import pymupdf4llm
+import pymupdf4llm
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Convert PDFs to Markdown
 def convert_pdfs_to_markdown(directory):
@@ -51,8 +54,8 @@ def data_loader_subfolders(main_directory):
     subfolders = [os.path.join(main_directory, d) for d in os.listdir(main_directory) if os.path.isdir(os.path.join(main_directory, d))]
     
     for subfolder in subfolders:
-        print(f"Loading data from {subfolder}...")
-        convert_pdfs_to_markdown(subfolder)
+        logger.info(f"Loading data from {subfolder}")
+        #convert_pdfs_to_markdown(subfolder)
         sections = save_sections_to_list(subfolder)
         all_sections.extend(sections)
     
