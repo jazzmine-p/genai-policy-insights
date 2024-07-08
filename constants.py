@@ -10,3 +10,4 @@ unstructured_api_key = os.getenv('UNSTRUCTURED_API_KEY')
 
 # Data file paths
 data_dir = 'data/'
+save_dir = 'results/'

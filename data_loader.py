@@ -21,7 +21,7 @@ def convert_pdfs_to_markdown(directory):
 # Split markdown text by section
 def split_markdown_by_section(markdown_text):
     # Lowercase the markdown text to make the regex case-insensitive
-    markdown_text = markdown_text.lower()
+    #markdown_text = markdown_text.lower()
 
     # Delete figures and images
     markdown_text = re.sub(r'!\[.*?\]\(.*?\)', '', markdown_text)

@@ -1,24 +1,19 @@
 import logging
 import os
+from constants import *
+from helpers import *
 from dotenv import load_dotenv
 from data_loader import convert_pdfs_to_markdown, split_markdown_by_section, save_sections_to_list, data_loader_subfolders
 from text_preprocessing import filter_sections, preprocess_text
 from topic_modeling import load_topic_modeling
 
-# Set up logger
-def setup_logging():
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        handlers=[
-                            logging.FileHandler("app.log"),
-                            logging.StreamHandler()
-                        ])
-    logger = logging.getLogger(__name__)
-    return logger
+create_directory(save_dir)
+model_dir = '/'
+create_directory(save_dir + model_dir)
+log_dir = os.path.join(save_dir, model_dir)
 
-# Main
 def main():
-    logger = setup_logging()
+    logger = setup_logging(log_dir)
     logger.info("Script started")
 
     # Load API keys
