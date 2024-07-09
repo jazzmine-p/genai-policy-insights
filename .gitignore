@@ -13,5 +13,8 @@ gaipal/
 # logs
 *.log
 
+# results
+results/
+
 # cache
 __pycache__/
