@@ -18,6 +18,12 @@ vectorizer_model:
 mmr_model:
     diversity: 0.3
 
+topic_model:
+    top_n_words: 10
+    min_topic_size: 5
+    verbose: True
+    calculate_probabilities: True
+
 unwanted_sections_header:
     - references
     - appendix

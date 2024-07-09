@@ -22,12 +22,14 @@ umap_config = config['umap_model']
 hdbscan_config = config['hdbscan_model']
 vectorizer_config = config['vectorizer_model']
 mmr_config = config['mmr_model']
+bert_config = config['topic_model']
 
 # Define BERTopic components
 def load_topic_modeling(documents):
     logger.info("Loading topic model")
     # Step 1 - Extract embeddings
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embeddings = embedding_model.encode(documents, show_progress_bar=True)
     # Try Gensim embeddings?
 
     # Step 2 - Reduce dimensionality
@@ -37,7 +39,7 @@ def load_topic_modeling(documents):
     hdbscan_model = HDBSCAN(**hdbscan_config)
 
     # Step 4 - Tokenize topics
-    vectorizer_model = CountVectorizer(**vectorizer_config)
+    vectorizer_model = CountVectorizer(**vectorizer_config, ngram_range=(1, 3))
 
     # Step 5 - Create topic representation
     ctfidf_model = ClassTfidfTransformer()
@@ -74,19 +76,13 @@ def load_topic_modeling(documents):
 
     # Run the model
     topic_model = BERTopic(
-    #nr_topics='auto',                         # Automatically determine the number of topics
-    embedding_model=embedding_model,          # Step 1 - Extract embeddings
-    umap_model=umap_model,                    # Step 2 - Reduce dimensionality
-    hdbscan_model=hdbscan_model,              # Step 3 - Cluster reduced embeddings
-    vectorizer_model=vectorizer_model,        # Step 4 - Tokenize topics
-    ctfidf_model=ctfidf_model,                # Step 5 - Extract topic words
-    representation_model=representation_model, # Step 6 - Fine-tune topic represenations
-
-    # Hyperparameters
-    #top_n_words=5,
-    #min_topic_size=2,
-    verbose=True,
-    calculate_probabilities=True # Calculate the topic probabilities per document
+        embedding_model=embedding_model,          
+        umap_model=umap_model,                    
+        hdbscan_model=hdbscan_model,              
+        vectorizer_model=vectorizer_model,        
+        ctfidf_model=ctfidf_model,                
+        representation_model=representation_model,         
+        **bert_config
     )
 
     return topic_model, embeddings
