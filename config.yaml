@@ -3,19 +3,40 @@ umap_model:
     n_components: 5
     min_dist: 0.0
     metric: cosine
+    random_state: 42
 
 hdbscan_model:
-    min_cluster_size: 15
+    min_cluster_size: 10
     metric: euclidean
     cluster_selection_method: eom
     prediction_data: True
 
 vectorizer_model:
-    tokenizer: LemmaTokenizer()
-    preprocessor: preprocess_text
     stop_words: english
-    ngram_range: (1, 3)
-    min_df: 10
+    min_df: 5
 
 mmr_model:
     diversity: 0.3
+
+unwanted_sections_header:
+    - references
+    - appendix
+    - glossary
+    - table of contents
+    - acknowledgments
+    - disclosure statement
+    - author
+    - contact
+    - executive summary
+    - introduction
+    
+entity_labels:
+    - PERSON
+    - ORG
+    - DATE
+
+phrase_mapping:
+  genai: "generative AI"
+  gen ai: "generative AI"
+  generative ai: "generative AI"
+  generative artificial intelligence: "generative AI"
