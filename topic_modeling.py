@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from umap import UMAP
 from hdbscan import HDBSCAN
 from sentence_transformers import SentenceTransformer
@@ -17,6 +19,10 @@ logger = logging.getLogger(__name__)
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
+# Load API keys
+load_dotenv()
+openai_api_key = os.getenv('OPENAI_API_KEY')
+
 # Access hyperparameters for each model
 umap_config = config['umap_model']
 hdbscan_config = config['hdbscan_model']
@@ -30,7 +36,6 @@ def load_topic_modeling(documents):
     # Step 1 - Extract embeddings
     embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     embeddings = embedding_model.encode(documents, show_progress_bar=True)
-    # Try Gensim embeddings?
 
     # Step 2 - Reduce dimensionality
     umap_model = UMAP(**umap_config)
@@ -44,18 +49,8 @@ def load_topic_modeling(documents):
     # Step 5 - Create topic representation
     ctfidf_model = ClassTfidfTransformer()
 
-    # Step 6 - Fine-tune topic representations
-    # KeyBERT
-    #keybert_model = KeyBERTInspired()
-
-    # Part-of-Speech
-    #pos_model = PartOfSpeech("en_core_web_sm")
-
-    # MMR to diversify topic representation
-    mmr_model = MaximalMarginalRelevance(**mmr_config)
-
     # GPT-3.5
-    #client = openai.OpenAI(api_key=openai_api_key)
+    client = openai.OpenAI(api_key=openai_api_key)
     prompt = """
     I have a topic that contains the following documents: 
     [DOCUMENTS]
@@ -64,14 +59,11 @@ def load_topic_modeling(documents):
     Based on the information above, extract a short but highly descriptive topic label of at most 5 words. Make sure it is in the following format:
     topic: <topic label>
     """
-    #openai_model = OpenAI(client, model="gpt-3.5-turbo", exponential_backoff=True, chat=True, prompt=prompt)
+    openai_model = OpenAI(client, model="gpt-3.5-turbo", exponential_backoff=True, chat=True, prompt=prompt)
 
     # All representation models
     representation_model = {
-        #"KeyBERT": keybert_model,
-        #"OpenAI": openai_model, 
-        "MMR": mmr_model#,
-        #"POS": pos_model
+        "OpenAI": openai_model
     }
 
     # Run the model
