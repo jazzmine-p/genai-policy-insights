@@ -2,43 +2,69 @@ import logging
 import os
 from constants import *
 from helpers import *
-from dotenv import load_dotenv
-from data_loader import convert_pdfs_to_markdown, split_markdown_by_section, save_sections_to_list, data_loader_subfolders
-from text_preprocessing import filter_sections, preprocess_text
-from topic_modeling import load_topic_modeling
-
-create_directory(save_dir)
-model_dir = '/'
-create_directory(save_dir + model_dir)
-log_dir = os.path.join(save_dir, model_dir)
+from data_loader import *
+from text_preprocessing import *
+from topic_modeling import *
+import json
+import pandas as pd
+import pyLDAvis
 
 def main():
-    logger = setup_logging(log_dir)
+    logger = setup_logging(log_dir, log_filename='app.log')
     logger.info("Script started")
 
-    # Load API keys
-    load_dotenv()
-    openai_api_key = os.getenv('OPENAI_API_KEY')
-    unstructured_api_key = os.getenv('UNSTRUCTURED_API_KEY')
 
     # Read and transform data
-    main_directory = "data/"
-    sections_list = data_loader_subfolders(main_directory)
-
+    if os.path.exists("documents.json"):
+        logger.info("Loading documents")
+        with open("documents.json", "r") as file:
+            all_docs = json.load(file)
+    else:
+        all_docs = data_loader_subfolders(data_dir)
+    
     # Preprocess text and chunk documents
-    filtered_sections = filter_sections(sections_list)
-    filtered_sections = preprocess_text(filtered_sections)
-
+    docs = preprocess_text(all_docs)
+    
     # Topic modeling
-    topic_model, embeddings = load_topic_modeling(filtered_sections)
-    logger.info("Training topic model")
-    topics, probs = topic_model.fit_transform(filtered_sections, embeddings)
-    logger.info("Topic modeling completed")
+    try:
+        logger.info("Loading topic model")
+        topic_model, embeddings = load_topic_modeling(docs)
+    except Exception as e:
+        logging.error(f"Error loading topic model: {e}")
+        raise
 
-    # Show topics
-    logger.info("Retrieving topic info")
+    try:
+        topics, probs = topic_model.fit_transform(docs)
+        logger.info("Topic modeling completed")
+    except Exception as e:
+        logging.error(f"Error fitting topic modeling: {e}")
+        raise
+
+    # Get all documents for all topics
+    """docs_by_topic = {}
     topic_info = topic_model.get_topic_info()
-    logger.info(f"Topic Info: {topic_info}")
+    for topic in topic_info.Topic.to_list()[1:]:  # Skip the -1 topic
+        docs_by_topic[topic] = topic_model.get_representative_docs(topic) 
+
+    logger.info("Saving topics")
+    with open(f'{log_dir}/docs_by_topic.json', 'w') as file:
+        json.dump(docs_by_topic, file, indent=2)"""
+    
+    # Get document info
+    doc_info = topic_model.get_document_info(docs)
+    doc_info = doc_info[['Document', 'Topic', 'Top_n_words']]
+    logger.info("Saving document info")
+    doc_info.to_csv(f'{log_dir}/doc_info.csv', index=False)
+
+    # Get topic info
+    topic_info = topic_model.get_topic_info()
+    logger.info("Saving topic info")
+    topic_info.to_csv(f'{log_dir}/topic_info.csv', index=False)
+
+    # Save pyLDAvis visualization
+    viz = create_topic_modeling_viz(topic_model, probs, docs)
+    logger.info("Saving pyLDAvis visualization")
+    pyLDAvis.save_html(viz, f'{log_dir}/pyLDAvis.html')
 
     logger.info("Script completed")
 
