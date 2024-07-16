@@ -10,6 +10,10 @@ def create_directory(directory_path):
 
 def setup_logging(log_dir, log_filename='app.log'):
     log_path = os.path.join(log_dir, log_filename)
+
+    with open(log_path, 'w'):
+        pass
+    
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         handlers=[
