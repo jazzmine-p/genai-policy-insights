@@ -43,6 +43,6 @@ def create_topic_modeling_viz(topic_model, probs, docs):
             'vocab': vocab,
             'term_frequency': term_frequency}
 
-    viz= pyLDAvis.prepare(**data,n_jobs = 1, mds='mmds')
+    viz= pyLDAvis.prepare(**data,sort_topics=False, n_jobs = 1, mds='mmds')
     
     return viz
