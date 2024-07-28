@@ -11,41 +11,48 @@ from constants import log_dir
 logger = logging.getLogger(__name__)
 with open('config.yaml', 'r') as file:
         config = yaml.safe_load(file)
-entity_labels = config['entity_labels']
-words_to_remove = config['words_to_remove']
+entity_labels = config['unwanted_entity_labels']
+unwanted_words = config['unwanted_words']
 
 nlp = spacy.load("en_core_web_sm")
+nlp.max_length = 1800000
 
 def remove_ner(text):
     doc = nlp(text)
 
-    # Create a dictionary to store the entities and their labels
-    ent_dict = {ent.text: ent.label_ for ent in doc.ents if ent.label_ in entity_labels}
-    
-    # Extract and remove the spans of the entities to be removed
-    spans = [(ent.start_char, ent.end_char) for ent in doc.ents if ent.label_ in entity_labels]
-    spans = sorted(spans, reverse=True)
-    for start, end in spans:
-        text = text[:start] + text[end:]
+    lemmatized_tokens = []
+    removed_entities = {}
 
-    return text, ent_dict
+    for token in doc:
+        if token.ent_type_ in entity_labels:
+            if token.ent_type_ not in removed_entities:
+                removed_entities[token.ent_type_] = []
+            removed_entities[token.ent_type_].append(token.text)
+        else:
+            lemmatized_tokens.append(token.lemma_)
+
+    # Construct the final text while handling punctuation and whitespace
+    lemmatized_text = ''
+    for i, token in enumerate(doc):
+        if token.ent_type_ not in entity_labels:
+            lemmatized_text += token.lemma_
+
+            # Add space only if the next token is not punctuation
+            if i + 1 < len(doc) and not doc[i + 1].is_punct:
+                lemmatized_text += ' '
+
+    return lemmatized_text.strip(), removed_entities
 
 def preprocess_text(text):
-    # Remove Markdown-style links
-    processed_text = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', text)
-    # Remove standalone URLs (http/https)
-    processed_text = re.sub(r'\b(?:https?://)\S+\b', '', processed_text)
-    # Remove URLs starting with www.
-    processed_text = re.sub(r'\b(?:www\.)\S+\b', '', processed_text)
-    # Consolidate phrases
-    phrase_mapping = config['phrase_mapping']
-    for key, value in phrase_mapping.items():
-        processed_text = re.sub(r'\b' + re.escape(key) + r'\b', value, processed_text, flags=re.IGNORECASE)
-    # NER
-    processed_text, ent = remove_ner(processed_text)
-    # Remove predefined words
-    #pattern = r'\b(?:{})\b'.format('|'.join(map(re.escape, words_to_remove)))
-    #processed_text = re.sub(pattern, '', processed_text)
+    # Lowercase the markdown text to make the regex case-insensitive
+    text = text.lower()
+    # NER and lemmatization
+    processed_text, ent = remove_ner(text)
+    # Remove numbers
+    processed_text = re.sub(r'\d+', '', processed_text)
+    # Remove words
+    pattern = r'\b(?:{})\b'.format('|'.join(map(re.escape, unwanted_words)))
+    processed_text = re.sub(pattern, '', processed_text)
     # Remove page divider
     #processed_text = re.sub(r'\n\n\n-+\n\n', ' ', processed_text)
     # Remove underscores
