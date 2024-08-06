@@ -15,8 +15,7 @@ warnings.filterwarnings('ignore')
 
 def main():
     logger = setup_logging(log_dir, log_filename='app.log')
-    logger.info("Script started")
-
+    logger.info(f"Script for {docs_type} started")
 
     # Read and transform data
     if os.path.exists(f"data/documents-{docs_type}.json"):

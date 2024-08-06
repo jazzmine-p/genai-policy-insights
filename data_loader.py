@@ -70,10 +70,12 @@ def filter_sections(all_sections):
 def split_markdown_by_section(markdown_text):
     # Delete figures and images
     markdown_text = re.sub(r'!\[.*?\]\(.*?\)', '', markdown_text)
+    # Remove email addresses
+    markdown_text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '', markdown_text)
     # Remove Markdown-style links
     markdown_text = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', markdown_text)
     # Remove standalone URLs (http/https)
-    markdown_text = re.sub(r'\b(?:https?://)\S+\b', '', markdown_text)
+    markdown_text = re.sub(r'\b(?:https?://)(?:\S|\s)+?(?=\s|$)', '', markdown_text)
     # Remove URLs starting with www.
     markdown_text = re.sub(r'\b(?:www\.)\S+\b', '', markdown_text)
     # Consolidate phrases

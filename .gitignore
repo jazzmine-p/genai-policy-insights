@@ -4,6 +4,9 @@
 # data
 data/
 
+# archive
+archive/
+
 # virtual environment
 gaipal/
 
