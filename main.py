@@ -1,11 +1,11 @@
 import logging
 import os
-from constants import *
-from helpers import *
-from data_loader import *
-from text_preprocessing import *
-from topic_modeling import *
-from visualization import *
+from modules.config.constants import *
+from modules.helpers import *
+from modules.data_loader import *
+from bertopic.text_preprocessing import *
+from bertopic import *
+from bertopic.visualization import *
 import json
 import pandas as pd
 import pyLDAvis

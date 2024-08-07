@@ -6,18 +6,18 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
 import pyLDAvis
-from constants import log_dir
+from modules.config.constants import log_dir
 
 # Barchart for top 5 keyword weights by topic
 def visualize_topic_term(
     topic_model,
     topics: List[int] = None,
     top_n_topics: int = None,
-    n_words: int = 5,
+    n_words: int = 10,
     custom_labels: Union[bool, str] = True,
     title: str = "<b>Top 5 Keywords per Topic</b>",
     width: int = 400,
-    height: int = 300,
+    height: int = 400,
     autoscale: bool = False,
 ) -> go.Figure:
 
@@ -49,7 +49,7 @@ def visualize_topic_term(
         cols=columns,
         shared_xaxes=False,
         horizontal_spacing=0.1,
-        vertical_spacing=0.4 / rows if rows > 1 else 0.1,
+        vertical_spacing=0.2 / rows if rows > 1 else 0.1,
         subplot_titles=subplot_titles,
     )
 

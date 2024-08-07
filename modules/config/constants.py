@@ -7,6 +7,7 @@ def create_directory(directory_path):
         print(f"Directory '{directory_path}' created.")
 
 # Directory
+chatbot_dir = 'data/'
 data_dir = 'data/'
 save_dir = 'results/'
 docs_type = 'all-docs' # 'all-docs', 'education, 'others'
@@ -17,4 +18,4 @@ log_dir = os.path.join(save_dir, model_dir)
 # Load API keys
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
-llama_api_key = os.getenv("LLAMA_CLOUD_API_KEY")
+llama_api_key = os.getenv("LLAMA_API_KEY")

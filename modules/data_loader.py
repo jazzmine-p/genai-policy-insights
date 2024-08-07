@@ -3,10 +3,12 @@ import fitz
 import pymupdf4llm
 import re
 import logging
-from constants import *
+from modules.config.constants import *
 import yaml
 import json
 from langchain_text_splitters import NLTKTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 logger = logging.getLogger(__name__)
 
@@ -95,16 +97,12 @@ def split_markdown_by_section(markdown_text):
     # Combine headers or bold text with their following content
     for section in sections:
         if isinstance(section, str) and re.match(r'^(#{1,6} .+?|(\*\*[A-Z0-9].+?\*\*))$', section):
-            # If we already have content in the current section, add it to the result
             if current_section:
                 result.append(current_section)
-            # Start a new section
             current_section = section
         elif isinstance(section, str):
-            # Append content to the current section
             current_section += "\n\n" + section
 
-    # Append the last section
     if current_section:
         result.append(current_section)
 
@@ -153,3 +151,25 @@ def data_loader_subfolders(main_directory):
             json.dump(all_sections, file)
     
     return all_sections
+
+def process_pdf(folder_path):
+    all_pages = []
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".pdf"):  
+            file_path = os.path.join(folder_path, filename)
+            
+            loader = PyPDFLoader(file_path)
+            pages = loader.load()
+
+            all_pages.extend(pages)
+
+    # Split the text of all pages
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=3000, 
+        chunk_overlap=200, 
+        add_start_index=True
+    )
+    
+    all_splits = text_splitter.split_documents(all_pages)
+    return all_splits

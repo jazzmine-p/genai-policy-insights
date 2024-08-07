@@ -1,12 +1,12 @@
-from typing import List
-from pathlib import Path
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+import os
+import yaml
+from modules.data_loader import process_pdf
+from modules.config.constants import chatbot_dir
+from sentence_transformers import SentenceTransformer
+from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
-from langchain_community.document_loaders import (
-    PyMuPDFLoader,
-)
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 from langchain.vectorstores.chroma import Chroma
 from langchain.indexes import SQLRecordManager, index
 from langchain.schema import Document
@@ -14,65 +14,43 @@ from langchain.schema.runnable import Runnable, RunnablePassthrough, RunnableCon
 from langchain.callbacks.base import BaseCallbackHandler
 
 import chainlit as cl
+import chainlit.data as cl_data
 
+# Load configurations
+with open('config.yaml', 'r') as config_file:
+    config = yaml.safe_load(config_file)
+embedding_config = config['embedding_model']['minilm-sm']
+retriever_config = config['retriever']
 
 chunk_size = 1024
 chunk_overlap = 50
 
-embeddings_model = OpenAIEmbeddings()
+embedding_model = SentenceTransformer(embedding_config)
 
-PDF_STORAGE_PATH = "data"
+# Create embeddings and vector store
+all_splits = process_pdf(chatbot_dir)
+vectorstore = Chroma.from_documents(documents=all_splits, embedding=embedding_model)
 
-
-def process_pdfs(pdf_storage_path: str):
-    pdf_directory = Path(pdf_storage_path)
-    docs = []  # type: List[Document]
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-
-    for pdf_path in pdf_directory.glob("*.pdf"):
-        loader = PyMuPDFLoader(str(pdf_path))
-        documents = loader.load()
-        docs += text_splitter.split_documents(documents)
-
-    doc_search = Chroma.from_documents(docs, embeddings_model)
-
-    namespace = "chromadb/my_documents"
-    record_manager = SQLRecordManager(
-        namespace, db_url="sqlite:///record_manager_cache.sql"
-    )
-    record_manager.create_schema()
-
-    index_result = index(
-        docs,
-        record_manager,
-        doc_search,
-        cleanup="incremental",
-        source_id_key="source",
-    )
-
-    print(f"Indexing stats: {index_result}")
-
-    return doc_search
-
-
-doc_search = process_pdfs(PDF_STORAGE_PATH)
+# Set up retriever with vector store
+retriever = vectorstore.as_retriever(**retriever_config)
 model = ChatOpenAI(model_name="gpt-4", streaming=True)
 
-
+# Function to handle chat start
 @cl.on_chat_start
 async def on_chat_start():
-    template = """Answer the question based only on the following context:
-
-    {context}
-
-    Question: {question}
+    template = """You are an AI assistant for Generative AI Policy Insights, developed by the Boston University's GenAI Task Force. Your main mission is to help users understand how different organizations perceive and make policies regarding the use of GenAI. Answer the user's question using the provided context that is relevant. The context is ordered by relevance. 
+                If you don't know the answer, do your best without making things up. If you cannot answer, just say you don't have enough relevant information to answer the questions. Keep the conversation flowing naturally. 
+                Always cite the source of the information. Use the source context that is most relevant. 
+                Keep the answer concise, yet professional and informative. Avoid sounding repetitive or robotic.\n
+                Context:\n{context}\n\n
+                Answer the user's question below in a friendly, concise, and engaging manner. Use the context and history only if relevant, otherwise, engage in a free-flowing conversation.\n
+                User: {question}\n
+                GenAI Policy Assistant:
     """
     prompt = ChatPromptTemplate.from_template(template)
 
     def format_docs(docs):
         return "\n\n".join([d.page_content for d in docs])
-
-    retriever = doc_search.as_retriever()
 
     runnable = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -83,7 +61,7 @@ async def on_chat_start():
 
     cl.user_session.set("runnable", runnable)
 
-
+# Function to handle incoming messages
 @cl.on_message
 async def on_message(message: cl.Message):
     runnable = cl.user_session.get("runnable")  # type: Runnable
@@ -103,7 +81,7 @@ async def on_message(message: cl.Message):
         def on_retriever_end(self, documents, *, run_id, parent_run_id, **kwargs):
             for d in documents:
                 source_page_pair = (d.metadata['source'], d.metadata['page'])
-                self.sources.add(source_page_pair)  # Add unique pairs to the set
+                self.sources.add(source_page_pair)  
 
         def on_llm_end(self, response, *, run_id, parent_run_id, **kwargs):
             if len(self.sources):

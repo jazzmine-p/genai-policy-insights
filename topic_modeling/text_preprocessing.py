@@ -6,7 +6,7 @@ import yaml
 import spacy
 import re
 import logging
-from constants import log_dir
+from modules.config.constants import log_dir
 
 logger = logging.getLogger(__name__)
 with open('config.yaml', 'r') as file:
@@ -15,7 +15,7 @@ entity_labels = config['unwanted_entity_labels']
 unwanted_words = config['unwanted_words']
 
 nlp = spacy.load("en_core_web_sm")
-nlp.max_length = 1800000
+nlp.max_length = 2800000
 
 def remove_ner(text):
     doc = nlp(text)

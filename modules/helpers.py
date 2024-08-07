@@ -2,7 +2,7 @@ import os
 import logging
 import yaml
 import pyLDAvis
-from constants import log_dir
+from modules.config.constants import log_dir
 
 def create_directory(directory_path):
     if not os.path.exists(directory_path):
