@@ -1,5 +1,5 @@
 # .env
-.env
+modules/config/.env
 
 # data
 data/
@@ -21,3 +21,6 @@ results/
 
 # cache
 __pycache__/
+
+# sql
+.sql
