@@ -1,5 +1,5 @@
 # .env
-modules/config/.env
+.env
 
 # data
 data/
@@ -8,19 +8,16 @@ data/
 archive/
 
 # virtual environment
-gaipal/
+bu-gaipal-venv/
 
 # json
 .json
 
 # logs
-*.log
+logs/
 
 # results
 results/
 
 # cache
 __pycache__/
-
-# sql
-.sql

@@ -3,18 +3,20 @@ import os
 from modules.config.constants import *
 from modules.helpers import *
 from modules.data_loader import *
-from bertopic.text_preprocessing import *
+from modules.bertopic.text_preprocessing import *
+from modules.bertopic.visualization import *
 from bertopic import *
-from bertopic.visualization import *
 import json
 import pandas as pd
 import pyLDAvis
 import plotly.io as pio
 import warnings
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
+
 
 def main():
-    logger = setup_logging(log_dir, log_filename='app.log')
+    logger = setup_logging(log_dir, log_filename="app.log")
     logger.info(f"Script for {docs_type} started")
 
     # Read and transform data
@@ -24,7 +26,7 @@ def main():
             docs = json.load(file)
     else:
         docs = data_loader_subfolders(data_dir)
-    
+
     """
     # Save preprocessed text for investigation
     processed_docs = []
@@ -50,23 +52,25 @@ def main():
     except Exception as e:
         logging.error(f"Error fitting topic modeling: {e}")
         raise
-    
+
     # Get document info
     doc_info = topic_model.get_document_info(docs)
-    doc_info = doc_info[['Document', 'Topic', 'Top_n_words']]
+    doc_info = doc_info[["Document", "Topic", "Top_n_words"]]
     logger.info("Saving document info")
-    doc_info.to_csv(f'{log_dir}/doc_info.csv', index=False)
+    doc_info.to_csv(f"{log_dir}/doc_info.csv", index=False)
 
     # Get topic info
     topic_info = topic_model.get_topic_info()
     logger.info("Saving topic info")
-    topic_info.to_csv(f'{log_dir}/topic_info.csv', index=False)
+    topic_info.to_csv(f"{log_dir}/topic_info.csv", index=False)
 
     # Get custom topic labels
     topic_label = {}
-    topic_info['OpenAI'] = topic_info['OpenAI'].astype(str).str.replace("['",'').str.replace("']",'')
+    topic_info["OpenAI"] = (
+        topic_info["OpenAI"].astype(str).str.replace("['", "").str.replace("']", "")
+    )
     for i in range(len(topic_info)):
-        topic_label[topic_info['Topic'][i]] = topic_info['OpenAI'][i]
+        topic_label[topic_info["Topic"][i]] = topic_info["OpenAI"][i]
     topic_model.set_topic_labels(topic_label)
 
     # Get topic-term matrix and save
@@ -74,25 +78,35 @@ def main():
     vocab = [word for word in topic_model.vectorizer_model.vocabulary_.keys()]
     topic_term_matrix = pd.DataFrame(tfidf, columns=vocab)
     logger.info("Saving topic-term matrix")
-    topic_term_matrix.to_csv(f'{log_dir}/topic_term_matrix.csv')
+    topic_term_matrix.to_csv(f"{log_dir}/topic_term_matrix.csv")
     logger.info("Saving vocab")
-    with open(f'{log_dir}/vocab.json', 'w') as file:
+    with open(f"{log_dir}/vocab.json", "w") as file:
         json.dump(vocab, file)
 
     # BERTopic visualization
     logger.info("Saving BERTopic visualizations")
     intertopic_distance = topic_model.visualize_topics(custom_labels=True)
-    pio.write_html(intertopic_distance, file=f'{log_dir}/intertopic_distance.html', auto_open=False)
-    datamap = topic_model.visualize_document_datamap(docs=docs, embeddings=embeddings, custom_labels=True)
-    datamap.savefig(f'{log_dir}/datamap.png')
+    pio.write_html(
+        intertopic_distance, file=f"{log_dir}/intertopic_distance.html", auto_open=False
+    )
+    datamap = topic_model.visualize_document_datamap(
+        docs=docs, embeddings=embeddings, custom_labels=True
+    )
+    datamap.savefig(f"{log_dir}/datamap.png")
     visualize_topic_term(topic_model)
     visualize_topic_hierarchy(topic_model, docs)
 
     # Save model
     logger.info("Saving topic model")
     embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
-    topic_model.save(f'{log_dir}/topic_model', serialization="safetensors", save_ctfidf=True, save_embedding_model=embedding_model)
+    topic_model.save(
+        f"{log_dir}/topic_model",
+        serialization="safetensors",
+        save_ctfidf=True,
+        save_embedding_model=embedding_model,
+    )
     logger.info("Script completed")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
