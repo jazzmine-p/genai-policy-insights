@@ -15,7 +15,7 @@ from modules.config.constants import *
 
 logger = logging.getLogger(__name__)
 
-with open('config.yaml', 'r') as config_file:
+with open('modules/config/config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 # Access hyperparameters for each model

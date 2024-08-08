@@ -9,7 +9,7 @@ import logging
 from modules.config.constants import log_dir
 
 logger = logging.getLogger(__name__)
-with open('config.yaml', 'r') as file:
+with open('modules/config/config.yaml', 'r') as file:
         config = yaml.safe_load(file)
 entity_labels = config['unwanted_entity_labels']
 unwanted_words = config['unwanted_words']
