@@ -1,7 +1,7 @@
 import os
 import yaml
 from modules.data_loader import process_pdf
-from modules.config.constants import chatbot_dir, llm_log_dir
+from modules.config.constants import chatbot_dir, llm_log_dir, hugging_face_token
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -31,7 +31,7 @@ chunk_overlap = 50
 embedding_model = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
                                         model_kwargs={
                                             "device": "cpu",
-                                            "token": "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",
+                                            "token": hugging_face_token,
                                             "trust_remote_code": True
                                         })
 
