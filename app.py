@@ -1,7 +1,7 @@
 import os
 import yaml
 from modules.data_loader import process_pdf
-from modules.config.constants import chatbot_dir, llm_log_dir, hugging_face_token
+from modules.config.constants import *
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -20,18 +20,18 @@ from modules.helpers import setup_logging
 logger = setup_logging(llm_log_dir, "app.log")
 
 # Load configurations
-with open("modules/config/config.yaml", "r") as config_file:
+with open(config_dir, "r") as config_file:
     config = yaml.safe_load(config_file)
-embedding_config = config["embedding_model"]["minilm-sm"]
+embedding_config = config["embedding_model"]["sentence-transformers"]
 retriever_config = config["retriever"]
 
 chunk_size = 1024
 chunk_overlap = 50
 
-embedding_model = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
+embedding_model = HuggingFaceEmbeddings(model_name=embedding_config,
                                         model_kwargs={
                                             "device": "cpu",
-                                            "token": hugging_face_token,
+                                            "token": huggingface_token,
                                             "trust_remote_code": True
                                         })
 
@@ -39,9 +39,12 @@ embedding_model = HuggingFaceEmbeddings(model_name='sentence-transformers/all-Mi
 all_splits = process_pdf(chatbot_dir)
 
 if os.path.exists("data/vectorstore/chroma.sqlite3"):
-    vectorstore = Chroma(persist_directory="data/vectorstore", embedding_function=embedding_model)
+    vectorstore = Chroma(persist_directory="data/vectorstore", 
+                         embedding_function=embedding_model)
 else:
-    vectorstore = Chroma.from_documents(documents=all_splits, embedding=embedding_model, persist_directory="data/vectorstore")
+    vectorstore = Chroma.from_documents(documents=all_splits, 
+                                        embedding=embedding_model, 
+                                        hypersist_directory="data/vectorstore")
 
 logger.info("Vector store created")
 print("Vector store created")
@@ -97,14 +100,18 @@ async def set_starters():
         ]
 @cl.on_chat_start
 async def on_chat_start():
-    template = """You are an AI assistant for Generative AI Policy Insights, developed by the Boston University's GenAI Task Force. Your main mission is to help users understand how different organizations perceive and make policies regarding the use of GenAI. Answer the user's question using the provided context that is relevant. The context is ordered by relevance. 
-                If you cannot answer, just say you don't have enough relevant information to answer the questions. Use the context and history only if relevant, otherwise, engage in a free-flowing conversation.
-                Always cite the source of the information. \n
-                Use the source context that is most relevant. \n
-                Context:\n{context}\n\n
-                Answer the user's question below in a friendly, helpful, concise, and engaging manner. Avoid sounding repetitive or robotic.\n
-                User: {question}\n
-                GenAI Policy Assistant:
+    template = """
+            "system\n"
+            "You are an AI assistant for Generative AI Policy Insights, developed by the Boston University's GenAI Task Force. Your main mission is to help users understand how different organizations perceive and make policies regarding the use of GenAI. Answer the user's question using the provided context that is relevant. The context is ordered by relevance. "
+            "If you don't know the answer, do your best without making things up. If you cannot answer, just say you don't have enough relevant information to answer the questions. Keep the conversation flowing naturally. "
+            "Always cite the source of the information. Use the source context that is most relevant. "
+            "Keep the answer concise, yet professional and informative. Avoid sounding repetitive or robotic.\n"
+            "\n\n"
+            "user\n"
+            "Context:\n{context}\n\n"
+            "Question: {input}\n"
+            "\n\n"
+            "assistant"
     """
     prompt = ChatPromptTemplate.from_template(template)
 

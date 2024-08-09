@@ -4,18 +4,17 @@ from hdbscan import HDBSCAN
 from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from bertopic import BERTopic
-from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance
+from bertopic.representation import KeyBERTInspired, MaximalMarginalRelevance, OpenAI, TextGeneration
 from bertopic.vectorizers import ClassTfidfTransformer
 import yaml
 import openai
-from bertopic.representation import OpenAI, TextGeneration
 import logging
-from text_preprocessing import preprocess_text
+from modules.bertopic.text_preprocessing import preprocess_text
 from modules.config.constants import *
 
 logger = logging.getLogger(__name__)
 
-with open('modules/config/config.yaml', 'r') as config_file:
+with open(config_dir, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 # Access hyperparameters for each model

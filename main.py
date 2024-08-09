@@ -4,19 +4,18 @@ from modules.config.constants import *
 from modules.helpers import *
 from modules.data_loader import *
 from modules.bertopic.text_preprocessing import *
+from modules.bertopic.topic_modeling import *
 from modules.bertopic.visualization import *
 from bertopic import *
 import json
 import pandas as pd
-import pyLDAvis
 import plotly.io as pio
 import warnings
 
 warnings.filterwarnings("ignore")
 
-
 def main():
-    logger = setup_logging(log_dir, log_filename="app.log")
+    logger = setup_logging(bertopic_log_dir, log_filename="app.log")
     logger.info(f"Script for {docs_type} started")
 
     # Read and transform data
@@ -57,12 +56,12 @@ def main():
     doc_info = topic_model.get_document_info(docs)
     doc_info = doc_info[["Document", "Topic", "Top_n_words"]]
     logger.info("Saving document info")
-    doc_info.to_csv(f"{log_dir}/doc_info.csv", index=False)
+    doc_info.to_csv(f"{bertopic_log_dir}/doc_info.csv", index=False)
 
     # Get topic info
     topic_info = topic_model.get_topic_info()
     logger.info("Saving topic info")
-    topic_info.to_csv(f"{log_dir}/topic_info.csv", index=False)
+    topic_info.to_csv(f"{bertopic_log_dir}/topic_info.csv", index=False)
 
     # Get custom topic labels
     topic_label = {}
@@ -78,29 +77,29 @@ def main():
     vocab = [word for word in topic_model.vectorizer_model.vocabulary_.keys()]
     topic_term_matrix = pd.DataFrame(tfidf, columns=vocab)
     logger.info("Saving topic-term matrix")
-    topic_term_matrix.to_csv(f"{log_dir}/topic_term_matrix.csv")
+    topic_term_matrix.to_csv(f"{bertopic_log_dir}/topic_term_matrix.csv")
     logger.info("Saving vocab")
-    with open(f"{log_dir}/vocab.json", "w") as file:
+    with open(f"{bertopic_log_dir}/vocab.json", "w") as file:
         json.dump(vocab, file)
 
     # BERTopic visualization
     logger.info("Saving BERTopic visualizations")
     intertopic_distance = topic_model.visualize_topics(custom_labels=True)
     pio.write_html(
-        intertopic_distance, file=f"{log_dir}/intertopic_distance.html", auto_open=False
+        intertopic_distance, file=f"{bertopic_log_dir}/intertopic_distance.html", auto_open=False
     )
     datamap = topic_model.visualize_document_datamap(
         docs=docs, embeddings=embeddings, custom_labels=True
     )
-    datamap.savefig(f"{log_dir}/datamap.png")
+    datamap.savefig(f"{bertopic_log_dir}/datamap.png")
     visualize_topic_term(topic_model)
     visualize_topic_hierarchy(topic_model, docs)
 
     # Save model
     logger.info("Saving topic model")
-    embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+    embedding_model = config["embedding_model"]["sentence-transformers"]
     topic_model.save(
-        f"{log_dir}/topic_model",
+        f"{bertopic_log_dir}/topic_model",
         serialization="safetensors",
         save_ctfidf=True,
         save_embedding_model=embedding_model,

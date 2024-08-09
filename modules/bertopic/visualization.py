@@ -5,7 +5,6 @@ from typing import List, Union
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
-import pyLDAvis
 from modules.config.constants import log_dir
 
 # Barchart for top 5 keyword weights by topic
@@ -137,23 +136,3 @@ def visualize_topic_hierarchy(topic_model, docs):
     )
 
     pio.write_html(fig, file=f'{log_dir}/topic_hierarchy_viz.html', auto_open=False)
-
-# Visualize topic clusters in pyLDAvis
-def visualize_topic_clusters(topic_model, probs, docs):
-    import numpy as np
-    topic_term_dists = topic_model.c_tf_idf_.toarray()
-    outlier = np.array(1 - probs.sum(axis=1)).reshape(-1, 1)
-    doc_topic_dists = np.hstack((probs, outlier))
-
-    doc_lengths = [len(doc) for doc in docs]
-    vocab = [word for word in topic_model.vectorizer_model.vocabulary_.keys()]
-    term_frequency = [topic_model.vectorizer_model.vocabulary_[word] for word in vocab]
-
-    data = {'topic_term_dists': topic_term_dists,
-            'doc_topic_dists': doc_topic_dists,
-            'doc_lengths': doc_lengths,
-            'vocab': vocab,
-            'term_frequency': term_frequency}
-
-    viz = pyLDAvis.prepare(**data,sort_topics=False, n_jobs = 1, mds='mmds')
-    pyLDAvis.save_html(viz, f'{log_dir}/pyLDAvis.html')

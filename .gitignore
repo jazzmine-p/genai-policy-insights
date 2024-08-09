@@ -2,7 +2,7 @@
 .env
 
 # data
-data/
+data/docs/
 
 # archive
 archive/
@@ -15,9 +15,5 @@ bu-gaipal-venv/
 
 # logs
 logs/
-
-# results
-results/
-
 # cache
 __pycache__/

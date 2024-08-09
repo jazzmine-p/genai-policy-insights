@@ -1,7 +1,7 @@
 import os
 import logging
 import yaml
-import pyLDAvis
+from modules.config.constants import config_dir
 
 def create_directory(directory_path):
     if not os.path.exists(directory_path):
@@ -23,10 +23,9 @@ def setup_logging(log_dir, log_filename="app.log"):
     logger = logging.getLogger(__name__)
 
     # Save the configuration file
-    config_path = "modules/config/config.yaml"
     import shutil
 
     destination_path = os.path.join(log_dir, "config.yaml")
-    shutil.copy2(config_path, destination_path)
+    shutil.copy2(config_dir, destination_path)
 
     return logger
