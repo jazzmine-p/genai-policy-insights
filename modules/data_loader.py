@@ -8,11 +8,16 @@ import json
 from langchain_text_splitters import NLTKTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.schema import Document
 
 logger = logging.getLogger(__name__)
 
-with open(config_dir, "r") as file:
-    config = yaml.safe_load(file)
+with open(config_bertopic_dir, "r") as file:
+    config_bertopic = yaml.safe_load(file)
+with open(config_chatbot_dir, "r") as file:
+    config_chatbot = yaml.safe_load(file)
+
+text_splitter_config = config_chatbot["text_splitter"]
 
 
 def convert_pdfs_to_markdown(directory):
@@ -51,7 +56,7 @@ def filter_sections(all_sections):
     # Compile regex patterns for unwanted headers, ensuring case-insensitivity
     unwanted_patterns = [
         re.compile(re.escape(text), re.IGNORECASE)
-        for text in config["unwanted_sections_header"]
+        for text in config_bertopic["unwanted_sections_header"]
     ]
 
     # Regex to capture section headers and bold text with newline following
@@ -93,7 +98,7 @@ def split_markdown_by_section(markdown_text):
     # Remove URLs starting with www.
     markdown_text = re.sub(r"\b(?:www\.)\S+\b", "", markdown_text)
     # Consolidate phrases
-    phrase_mapping = config["phrase_mapping"]
+    phrase_mapping = config_bertopic["phrase_mapping"]
     for key, value in phrase_mapping.items():
         markdown_text = re.sub(
             r"\b" + re.escape(key) + r"\b", value, markdown_text, flags=re.IGNORECASE
@@ -151,8 +156,12 @@ def save_sections_to_list(directory):
 
                 for section in filtered_sections:
                     chunks = token_splitter.split_text(section)
-                    sections_list.extend(chunks)
-
+                    for chunk in chunks:
+                        chunk = [Document(page_content=chunk, source="", page="")]
+                        sections_list.extend(chunk)
+                        print(chunk)
+                        print(chunk[0].metadata)
+                        exit()
             # result = {markdown_file: {}}
 
         except Exception as e:
@@ -197,7 +206,9 @@ def process_pdf(folder_path):
 
     # Split the text of all pages
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=3000, chunk_overlap=200, add_start_index=True
+        chunk_size=text_splitter_config["chunk_size"],
+        chunk_overlap=text_splitter_config["chunk_overlap"],
+        add_start_index=True,
     )
 
     all_splits = text_splitter.split_documents(all_pages)

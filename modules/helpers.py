@@ -1,7 +1,7 @@
 import os
 import logging
 import yaml
-from modules.config.constants import config_dir
+from modules.config.constants import config_bertopic_dir, config_chatbot_dir
 
 def create_directory(directory_path):
     if not os.path.exists(directory_path):
@@ -24,6 +24,11 @@ def setup_logging(log_dir, log_filename="app.log"):
 
     # Save the configuration file
     import shutil
+
+    if "chatbot" in log_dir:
+        config_dir = config_chatbot_dir
+    else:
+        config_dir = config_bertopic_dir
 
     destination_path = os.path.join(log_dir, "config.yaml")
     shutil.copy2(config_dir, destination_path)

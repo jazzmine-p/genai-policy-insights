@@ -1,0 +1,23 @@
+embedding_model:
+  sentence-transformers: sentence-transformers/all-MiniLM-L6-v2
+
+retriever:
+  search_type: similarity
+  search_kwargs: {"k": 3}
+
+text_splitter:
+  chunk_size: 3000
+  chunk_overlap: 200
+    
+llama_cpp:
+  model_path: C:/Users/pnhua/Downloads/tinyllama-1.1b-chat-v1.0.Q4_K_S.gguf
+  n_batch: 512
+  n_ctx: 2048
+  f16_kv: True
+  verbose: True
+  n_threads: 2
+  temperature: 0.7
+
+openai:
+  model_name: gpt-4o-mini
+  streaming: True

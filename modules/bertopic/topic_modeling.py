@@ -14,7 +14,7 @@ from modules.config.constants import *
 
 logger = logging.getLogger(__name__)
 
-with open(config_dir, 'r') as config_file:
+with open(config_bertopic_dir, 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 # Access hyperparameters for each model

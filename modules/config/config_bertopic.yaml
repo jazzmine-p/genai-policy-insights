@@ -1,0 +1,133 @@
+embedding_model:
+    minilm-sm: all-MiniLM-L6-v2
+    minilm-lg: all-MiniLM-L12-v2
+    alibaba-gte: Alibaba-NLP/gte-Qwen2-1.5B-instruct
+
+umap_model:
+    n_neighbors: 15
+    n_components: 5
+    min_dist: 0.0
+    metric: cosine
+    random_state: 42
+
+hdbscan_model:
+    min_cluster_size: 6
+    metric: euclidean
+    cluster_selection_method: eom
+    prediction_data: True
+
+vectorizer_model:
+    stop_words: english
+    analyzer: word
+
+mmr_model:
+    diversity: 0.7
+
+representation_model:
+    openai_model:
+        model: gpt-3.5-turbo
+        exponential_backoff: True
+        chat: True
+      
+topic_model:
+    nr_topics: 51
+    language: english
+    top_n_words: 10
+    min_topic_size: 6
+    verbose: True
+    calculate_probabilities: True
+    
+unwanted_sections_header:
+    - references
+    - appendix
+    - glossary
+    - table of contents
+    - acknowledgments
+    - disclosure statement
+    - author
+    - contact
+    - executive summary
+    - introduction
+    - funding
+    - citation
+    - endnotes
+    - notes
+    - abstract
+    - bibliography
+    
+unwanted_entity_labels:
+    - DATE
+    - TIME
+    - PERSON
+    - GPE
+    - ORG
+    - NORP
+    - LOCATION
+    - FAC
+    - LANGUAGE
+    - LAW
+    - MONEY
+    - PERCENT
+    - QUANTITY
+    - CARDINAL
+
+unwanted_words:
+    - et al.
+    - uk
+    - cornell
+    - fi
+    - deloitte
+    - ungps
+    - rfi
+    - eu
+    - omb
+    - col
+    - dttl
+    - oj
+    - scp
+    - shall
+    - kpmg
+    - china
+    - ipr
+    - ccs
+    - caio
+    - ostp
+    - 'yes'
+    - hai
+    - ospi
+    - wisc
+    - aws
+    - maergo
+    - ut
+    - ferpa
+    - bu
+    - like
+    - likely
+    - aio
+    - cu
+    - utm
+    - th
+    - elon
+    - iu
+    - bing
+    - september
+    - et
+    - psu
+    - yyy
+    - xx
+    - adobe
+    - wong
+    - ioa
+    - eur
+
+phrase_mapping:
+  gen ai: "genai"
+  generative ai: "genai"
+  generative artificial intelligence: "genai"
+  gai: "genai"
+  ai: "genai"
+  artificial intelligence: "genai"
+  large language models: "llm"
+  large language model: "llm"
+  language model: "llm"
+

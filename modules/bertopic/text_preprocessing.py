@@ -6,10 +6,10 @@ import yaml
 import spacy
 import re
 import logging
-from modules.config.constants import log_dir
+from modules.config.constants import config_bertopic_dir
 
 logger = logging.getLogger(__name__)
-with open(config_dir, 'r') as file:
+with open(config_bertopic_dir, 'r') as file:
         config = yaml.safe_load(file)
 entity_labels = config['unwanted_entity_labels']
 unwanted_words = config['unwanted_words']

@@ -20,8 +20,7 @@ prompts = {
             "Answer the user's question below in a friendly, concise, and engaging manner. Use the context and history only if relevant, otherwise, engage in a free-flowing conversation.\n"
             "User: {input}\n"
             "GenAI Policy Assistant:"
-        )
-        ,
+        ),
         "prompt_no_history": (
             "You are an AI assistant for Generative AI Policy Insights, developed by the Boston University's GenAI Task Force. Your main mission is to help users understand how different organizations perceive and make policies regarding the use of GenAI. Answer the user's question using the provided context that is relevant. The context is ordered by relevance. "
             "If you don't know the answer, do your best without making things up. If you cannot answer, just say you don't have enough relevant information to answer the questions. Keep the conversation flowing naturally. "
