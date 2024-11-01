@@ -87,16 +87,20 @@ async def set_starters():
 
     return [
         cl.Starter(
-            label="recording on CNNs?",
-            message="Where can I find the recording for the lecture on Transformers?",
-            # icon="/public/adv-screen-recorder-svgrepo-com.svg",
+            label="GenAI Usage in Academia?",
+            message="How is GenAI currently be used in academia?",
+            # icon="",
         ),
         cl.Starter(
-            label="where's the slides?",
-            message="When are the lectures? I can't find the schedule.",
-            # icon="/public/alarmy-svgrepo-com.svg",
+            label="GenAI Policy across Businesses?",
+            message="What are the different policies that businesses have regarding the use of Generative AI?",
+            # icon="",
         ),
-        cl.Starter(label="Due Date?", message="When is the final project due?"),
+        cl.Starter(
+            label="?",
+            message="?",
+            # icon="",
+        ),
     ]
 
 
